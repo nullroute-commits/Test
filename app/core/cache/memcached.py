@@ -57,7 +57,7 @@ class MemcachedClient:
         """
         if isinstance(key, str):
             key = key.encode('utf-8')
-        return f"{self.namespace}:{hashlib.md5(key).hexdigest()}"
+        return f"{self.namespace}:{hashlib.sha256(key).hexdigest()}"
     
     def get(self, key: str, default: Any = None) -> Any:
         """

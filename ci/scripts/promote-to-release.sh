@@ -65,17 +65,29 @@ BUILD_VERSION=$TARGET_TAG /app/ci/deploy.sh production
 
 # Create release notes
 echo -e "${YELLOW}Creating release notes...${NC}"
+# Check for git availability and repository status
+if command -v git >/dev/null 2>&1 && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    GIT_COMMIT="$(git rev-parse HEAD)"
+    GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+    GIT_LOG="$(git log --oneline --since="7 days ago" | head -10)"
+else
+    echo -e "${YELLOW}⚠️ Git not available or not a repository. Release notes will not include git info.${NC}"
+    GIT_COMMIT="N/A"
+    GIT_BRANCH="N/A"
+    GIT_LOG="No git history available."
+fi
+
 cat > reports/release-notes.md << EOF
 # Release $TARGET_TAG
 
 **Deployment Date:** $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)
 **Source Tag:** $SOURCE_TAG
 **Production Tag:** $TARGET_TAG
-**Git Commit:** $(git rev-parse HEAD)
-**Git Branch:** $(git rev-parse --abbrev-ref HEAD)
+**Git Commit:** $GIT_COMMIT
+**Git Branch:** $GIT_BRANCH
 
 ## Changes
-$(git log --oneline --since="7 days ago" | head -10)
+$GIT_LOG
 
 ## Deployment Verification
 - ✅ Security scan passed

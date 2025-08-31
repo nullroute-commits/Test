@@ -1,0 +1,127 @@
+version: '3.8'
+
+# Last updated: 2025-08-30 22:40:55 UTC by nullroute-commits
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        - PYTHON_VERSION=3.12.5
+        - BUILDPLATFORM=${DOCKER_PLATFORM:-linux/amd64}
+        - TARGETPLATFORM=${DOCKER_PLATFORM:-linux/amd64}
+    depends_on:
+      - db
+      - memcached
+      - rabbitmq
+    env_file:
+      - .env
+      - .env.app
+      - .env.db
+      - .env.cache
+      - .env.queue
+      - .env.security
+      - .env.logging
+    volumes:
+      - ./app:/app/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+      - logs_volume:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  db:
+    image: postgres:17.2
+    platform: ${DOCKER_PLATFORM:-linux/amd64}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - ./init-scripts:/docker-entrypoint-initdb.d/
+    env_file:
+      - .env
+      - .env.db
+    command: >
+      postgres
+      -c max_connections=${PG_MAX_CONNECTIONS:-100}
+      -c shared_buffers=${PG_SHARED_BUFFERS:-256MB}
+      -c work_mem=${PG_WORK_MEM:-4MB}
+      -c maintenance_work_mem=${PG_MAINTENANCE_WORK_MEM:-64MB}
+      -c effective_cache_size=${PG_EFFECTIVE_CACHE_SIZE:-1GB}
+      -c wal_buffers=${PG_WAL_BUFFERS:-16MB}
+      -c log_statement=${PG_LOG_STATEMENT:-none}
+      -c log_min_duration_statement=${PG_LOG_MIN_DURATION:-1000}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-django_app}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  memcached:
+    image: memcached:1.6.22
+    platform: ${DOCKER_PLATFORM:-linux/amd64}
+    command: memcached -m ${MEMCACHED_MEMORY:-64} -c ${MEMCACHED_CONNECTIONS:-1024} -t ${MEMCACHED_THREADS:-4}
+    env_file:
+      - .env
+      - .env.cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "echo stats | nc localhost 11211"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  rabbitmq:
+    image: rabbitmq:3.12.8-management
+    platform: ${DOCKER_PLATFORM:-linux/amd64}
+    env_file:
+      - .env
+      - .env.queue
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-/}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  nginx:
+    image: nginx:1.24.0
+    platform: ${DOCKER_PLATFORM:-linux/amd64}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      - web
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  static_volume:
+  media_volume:
+  logs_volume:

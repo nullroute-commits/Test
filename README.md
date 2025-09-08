@@ -1,363 +1,342 @@
-# Django 5 Multi-Architecture CI/CD Pipeline
+# Enterprise CI/CD Pipeline
 
-A comprehensive Django 5 application with SQLAlchemy, PostgreSQL 17, RBAC (Role-Based Access Control), audit logging, and containerized CI/CD pipeline using Docker Compose.
+A production-grade CI/CD pipeline implementation using Python 3.12, Docker Compose, and Ansible with comprehensive testing, security scanning, and multi-environment deployment support.
 
-## Overview
+## 🚀 Features
 
-This project demonstrates a production-ready Django 5 application with the following features:
+- **Python 3.12.5** (latest stable) with modern async/await patterns and type hints
+- **Docker Compose** for consistent environment management
+- **Multi-environment support** (dev, test, staging, prod) with PATH-scoped configurations
+- **Comprehensive CI/CD** with GitHub Actions, GitLab CI, and Jenkins support
+- **Infrastructure as Code** using Ansible 10.5.0 (latest stable)
+- **Security-first approach** with automated scanning and policy enforcement
+- **Enterprise-grade monitoring** with Prometheus, Grafana, and distributed tracing
+- **Automated testing** including unit, integration, E2E, and performance tests
+- **Blue-green and rolling deployments** with automatic rollback capabilities
 
-- **Django 5.0.2** with Python 3.12.5
-- **PostgreSQL 17.2** database with optimized configuration
-- **SQLAlchemy 1.4.49** for advanced ORM capabilities
-- **Memcached 1.6.22** for high-performance caching
-- **RabbitMQ 3.12.8** for message queuing and async processing
-- **RBAC System** for fine-grained access control
-- **Audit Logging** for comprehensive activity tracking
-- **Multi-architecture Docker support** (linux/amd64, linux/arm64)
-- **Containerized CI/CD pipeline** using Docker Compose
-- **Code quality tools** (Black, Flake8, MyPy)
+## 📋 Prerequisites
 
-## Quick Start
-
-### Prerequisites
-
-- Docker 24.0.7+
-- Docker Compose 2.18.1+
+- Docker Engine 27.2.0+ and Docker Compose v2.29.2+
+- Python 3.12.5
+- Ansible 10.5.0 (ansible-core 2.17.5)
+- Make (for automation)
 - Git
 
-### Development Environment
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/nullroute-commits/Test.git
-   cd Test
-   ```
-
-2. **Start development environment:**
-   ```bash
-   ./scripts/start-dev.sh
-   ```
-
-3. **Access the application:**
-   - Django App: http://localhost:8000
-   - Admin Panel: http://localhost:8000/admin (admin/admin123)
-   - Database Admin: http://localhost:8080
-   - RabbitMQ Management: http://localhost:15672 (guest/guest)
-   - Mailhog: http://localhost:8025
-
-### Testing
-
-Run the complete test suite:
-```bash
-./scripts/start-test.sh
-```
-
-Run specific test types:
-```bash
-# Unit tests only
-docker-compose -f ci/docker-compose.ci.yml run unit-tests
-
-# Integration tests only
-docker-compose -f ci/docker-compose.ci.yml run integration-tests
-
-# Code quality checks
-docker-compose -f ci/docker-compose.ci.yml run lint-check
-```
-
-### Production Deployment
-
-1. **Configure environment:**
-   ```bash
-   cp environments/.env.production.example environments/.env.production
-   # Edit the file with production values
-   ```
-
-2. **Deploy:**
-   ```bash
-   ./scripts/start-prod.sh
-   ```
-
-## Architecture
-
-### System Components
+## 🏗️ Project Structure
 
 ```
-┌───────────────────────────────────────────────────────────────────────────┐
-│                           Presentation Layer                               │
-│                                                                           │
-│    ┌─────────────┐     ┌────────────────┐      ┌────────────────┐        │
-│    │ Nginx 1.24  │────▶│ Django 5.0.2   │      │ Admin Interface│        │
-│    │ Load Balancer│     │ Web Application│      │ Management     │        │
-│    └─────────────┘     └────────────────┘      └────────────────┘        │
-└───────────────────────────────────────────────────────────────────────────┘
-                                    │
-┌───────────────────────────────────────────────────────────────────────────┐
-│                           Application Layer                                │
-│                                                                           │
-│    ┌───────────────┐     ┌────────────────┐      ┌────────────────┐      │
-│    │ RBAC System   │     │ Audit Logging  │      │ Business Logic │      │
-│    │ Authorization │     │ Activity Track │      │ Django Apps    │      │
-│    └───────────────┘     └────────────────┘      └────────────────┘      │
-└───────────────────────────────────────────────────────────────────────────┘
-                                    │
-┌───────────────────────────────────────────────────────────────────────────┐
-│                           Data Layer                                       │
-│                                                                           │
-│    ┌───────────────┐     ┌────────────────┐      ┌────────────────┐      │
-│    │ PostgreSQL 17 │     │ Memcached      │      │ RabbitMQ       │      │
-│    │ Database      │     │ Cache          │      │ Message Broker │      │
-│    └───────────────┘     └────────────────┘      └────────────────┘      │
-└───────────────────────────────────────────────────────────────────────────┘
+enterprise-app/
+├── src/                    # Application source code
+│   ├── api/               # FastAPI application
+│   ├── core/              # Core business logic
+│   └── utils/             # Utility functions
+├── tests/                  # Test suites
+│   ├── unit/              # Unit tests
+│   ├── integration/       # Integration tests
+│   ├── e2e/               # End-to-end tests
+│   └── performance/       # Performance tests
+├── docker/                 # Docker configurations
+│   ├── dev/               # Development environment
+│   ├── test/              # Test environment
+│   └── prod/              # Production environment
+├── environments/           # Environment-specific configs
+│   ├── dev/               # Development configs with PATH scoping
+│   ├── test/              # Test configs
+│   └── prod/              # Production configs
+├── ansible/                # Ansible automation
+│   ├── playbooks/         # Deployment playbooks
+│   ├── inventories/       # Environment inventories
+│   └── roles/             # Reusable roles
+├── ci-cd/                  # CI/CD configurations
+│   ├── github-actions/    # GitHub Actions workflows
+│   └── gitlab-ci/         # GitLab CI templates
+└── monitoring/            # Monitoring configurations
+    ├── prometheus/        # Prometheus configs
+    └── grafana/           # Grafana dashboards
 ```
 
-### Key Features
+## 🚀 Quick Start
 
-#### RBAC (Role-Based Access Control)
-- User, Role, and Permission models
-- Hierarchical permission system
-- Cached permission checks for performance
-- Decorator-based access control
-
-#### Audit Logging
-- Comprehensive activity tracking
-- Model change detection
-- Request/response logging
-- User authentication monitoring
-- Sensitive data sanitization
-
-#### Caching and Message Queuing
-
-**Memcached:**
-- Distributed memory caching system
-- Connection pooling for efficient resource usage
-- Automatic key namespacing to prevent collisions
-- Configurable timeout handling
-- Cache decorator for easy function result caching
-
-**RabbitMQ:**
-- Message broker for asynchronous processing
-- Durable queues and messages for reliability
-- Dead-letter queues for failed message handling
-- Automatic reconnection for fault tolerance
-- Task queue decorator for easy asynchronous execution
-
-#### Multi-Architecture Support
-- Supports linux/amd64 and linux/arm64 platforms
-- Docker Buildx for cross-platform builds
-- Optimized images for each architecture
-
-## Development
-
-### Code Quality
-
-The project enforces high code quality standards:
+### 1. Clone the Repository
 
 ```bash
-# Format code
-black app/ config/ --line-length 120
-
-# Lint code
-flake8 app/ config/ --max-line-length=120
-
-# Type checking
-mypy app/ config/
-
-# Security scanning
-bandit -r app/ -f json
-safety check -r requirements/base.txt
+git clone https://github.com/your-org/enterprise-app.git
+cd enterprise-app
 ```
 
-### Pre-commit Hooks
+### 2. Set Up Environment
 
-Install pre-commit hooks to ensure code quality:
 ```bash
-./scripts/pre-commit.sh
-git config core.hooksPath scripts/
+# Copy environment templates
+cp environments/dev/.env.example environments/dev/.env.local
+
+# Load environment (with PATH scoping)
+source scripts/env-loader.sh dev
 ```
 
-### Environment Configuration
-
-The application uses environment-specific configuration:
-
-- **Development:** `config/settings/development.py`
-- **Testing:** `config/settings/testing.py`
-- **Production:** `config/settings/production.py`
-
-Environment variables are organized in separate files:
-- `.env.app` - Application settings
-- `.env.db` - Database configuration
-- `.env.cache` - Memcached settings
-- `.env.queue` - RabbitMQ configuration
-- `.env.security` - Security settings
-- `.env.logging` - Logging configuration
-
-## CI/CD Pipeline
-
-### Containerized Pipeline
-
-The CI/CD pipeline runs entirely in Docker containers:
+### 3. Start Development Environment
 
 ```bash
-# Run full CI pipeline
-docker-compose -f ci/docker-compose.ci.yml up
+# Using Make
+make dev-up
 
-# Individual pipeline stages
-docker-compose -f ci/docker-compose.ci.yml run ci-runner lint
-docker-compose -f ci/docker-compose.ci.yml run ci-runner test
-docker-compose -f ci/docker-compose.ci.yml run ci-runner build
-docker-compose -f ci/docker-compose.ci.yml run ci-runner deploy staging
+# Or using Docker Compose directly
+docker compose -f docker-compose.base.yml -f docker-compose.dev.yml up -d
+```
+
+### 4. Run Tests
+
+```bash
+# Run all tests
+make test
+
+# Run specific test suites
+make test ENVIRONMENT=test
+docker compose -f docker-compose.pipeline.yml run --rm pipeline-executor test
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Environment-specific configurations are stored in `environments/{env}/.env` files with PATH scoping support:
+
+```bash
+# Load environment with PATH scoping
+source scripts/env-loader.sh [dev|test|staging|prod]
+
+# This sets:
+# - PATH to include environment-specific binaries
+# - PYTHONPATH for environment-specific modules
+# - Environment-specific tool configurations
+```
+
+### Docker Compose Environments
+
+Each environment has its own Docker Compose configuration:
+
+- `docker-compose.dev.yml` - Development with hot-reload and debug tools
+- `docker-compose.test.yml` - Testing with isolated databases
+- `docker-compose.prod.yml` - Production with security and monitoring
+
+## 📦 CI/CD Pipeline
+
+### Using Docker Compose for CI/CD Runners
+
+The pipeline uses Docker Compose to run CI/CD jobs consistently:
+
+```bash
+# Start CI/CD infrastructure
+make setup
+
+# Run pipeline stages
+make pipeline ENVIRONMENT=test
 ```
 
 ### Pipeline Stages
 
-1. **Lint:** Code quality checks (Black, Flake8, MyPy, Bandit)
-2. **Test:** Unit and integration tests with coverage
-3. **Build:** Multi-architecture Docker image builds
-4. **Security:** Vulnerability scanning
-5. **Deploy:** Environment-specific deployments
+1. **Code Quality** - Linting, formatting, type checking
+2. **Security Scanning** - Dependency scanning, SAST, container scanning
+3. **Testing** - Unit, integration, and E2E tests
+4. **Build** - Multi-stage Docker builds
+5. **Deploy** - Environment-specific deployment with Ansible
 
-### Promotion Workflow
+### GitHub Actions
+
+```yaml
+name: CI/CD Pipeline
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: [self-hosted, docker]
+    steps:
+      - uses: actions/checkout@v4
+      - run: make test
+```
+
+### GitLab CI
+
+```yaml
+stages:
+  - test
+  - build
+  - deploy
+
+test:
+  stage: test
+  script:
+    - make test
+```
+
+## 🔒 Security
+
+### Security Scanning Tools
+
+- **Bandit** - Python AST security scanner
+- **Safety** - Dependency vulnerability scanner
+- **Trivy** - Container vulnerability scanner
+- **SonarQube** - Code quality and security analysis
+
+### Pre-commit Hooks
 
 ```bash
-# Promote to test environment
-./ci/scripts/promote-to-test.sh
+# Install pre-commit hooks
+pre-commit install
 
-# Promote to production
-./ci/scripts/promote-to-release.sh
+# Run manually
+pre-commit run --all-files
 ```
 
-## API Documentation
+## 🚀 Deployment
 
-### Health Check
-```
-GET /health/
-```
-Returns application health status.
+### Deploy to Environment
 
-### Admin Interface
-```
-GET /admin/
-```
-Django admin interface for user and system management.
-
-## Security
-
-### Security Features
-- HTTPS/TLS support
-- CSRF protection
-- XSS prevention
-- SQL injection protection
-- Rate limiting
-- Session security
-- Input validation
-- Output encoding
-
-### Security Headers
-- X-Frame-Options
-- X-Content-Type-Options
-- X-XSS-Protection
-- Content-Security-Policy
-- Strict-Transport-Security
-
-## Monitoring and Logging
-
-### Logging
-- Structured logging with JSON format
-- Log rotation and archival
-- Centralized log aggregation
-- Error tracking with Sentry (production)
-
-### Monitoring
-- Health check endpoints
-- Prometheus metrics (production)
-- Database performance monitoring
-- Cache hit/miss ratios
-- Queue depth monitoring
-
-## Deployment
-
-### Environment-Specific Deployments
-
-**Development:**
 ```bash
-docker-compose -f docker-compose.development.yml up
+# Deploy to development
+make deploy ENVIRONMENT=dev
+
+# Deploy to production (requires confirmation)
+environments/prod/bin/deploy --confirm-production
 ```
 
-**Testing:**
+### Using Ansible
+
 ```bash
-docker-compose -f docker-compose.testing.yml up
+# Deploy with Ansible
+ansible-playbook -i ansible/inventories/prod/hosts.yml \
+  ansible/playbooks/deploy.yml \
+  -e "app_version=v1.0.0" \
+  -e "environment=production"
 ```
 
-**Production:**
+### Rollback
+
 ```bash
-docker-compose -f docker-compose.production.yml up
+# Rollback to previous version
+ansible-playbook -i ansible/inventories/prod/hosts.yml \
+  ansible/playbooks/rollback.yml \
+  -e "rollback_version=v0.9.0" \
+  -e "environment=production"
 ```
 
-### Scaling
+## 📊 Monitoring
 
-Scale web workers:
+### Access Monitoring Tools
+
+- **Prometheus**: http://localhost:9090
+- **Grafana**: http://localhost:3000
+- **Jaeger**: http://localhost:16686
+
+### Health Checks
+
 ```bash
-docker-compose -f docker-compose.production.yml up -d --scale web=3
+# Check application health
+curl http://localhost:8000/health
+
+# Check metrics
+curl http://localhost:8000/metrics
 ```
 
-## Troubleshooting
+## 🧪 Testing
 
-### Common Issues
+### Run Test Suites
 
-1. **Database Connection Issues:**
-   ```bash
-   # Check database logs
-   docker-compose logs db
-   
-   # Test connection
-   docker-compose exec web python manage.py dbshell
-   ```
-
-2. **Cache Issues:**
-   ```bash
-   # Check Memcached status
-   docker-compose exec memcached echo "stats" | nc localhost 11211
-   ```
-
-3. **Queue Issues:**
-   ```bash
-   # Check RabbitMQ status
-   docker-compose exec rabbitmq rabbitmqctl status
-   ```
-
-### Debug Mode
-
-Enable debug logging:
 ```bash
-export LOG_LEVEL=DEBUG
-export DJANGO_LOG_LEVEL=DEBUG
+# Unit tests
+pytest tests/unit -v
+
+# Integration tests
+pytest tests/integration -v
+
+# End-to-end tests
+pytest tests/e2e -v
+
+# Performance tests
+docker run --rm -v ./tests/performance:/scripts \
+  grafana/k6:latest run /scripts/load-test.js
 ```
 
-## Contributing
+### Coverage Reports
+
+```bash
+# Generate coverage report
+pytest --cov=src --cov-report=html
+
+# View report
+open htmlcov/index.html
+```
+
+## 🛠️ Development
+
+### Local Development
+
+```bash
+# Install dependencies
+pip install -e ".[dev]"
+
+# Run application locally
+uvicorn src.api.main:app --reload
+
+# Run with Docker
+docker compose -f docker-compose.dev.yml up
+```
+
+### Code Style
+
+```bash
+# Format code
+black src tests
+
+# Lint code
+ruff check src tests
+
+# Type checking
+mypy src
+```
+
+## 📚 Documentation
+
+### API Documentation
+
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+### Generate Documentation
+
+```bash
+# Build documentation
+mkdocs build
+
+# Serve locally
+mkdocs serve
+```
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make changes following code quality standards
-4. Run tests and ensure they pass
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-### Development Workflow
-
-1. **Setup:** `./scripts/start-dev.sh`
-2. **Test:** `./scripts/start-test.sh`
-3. **Lint:** `./ci/lint.sh`
-4. **Build:** `./ci/build.sh`
-
-## License
+## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+## 🙏 Acknowledgments
 
-For questions and support:
-- GitHub Issues: [https://github.com/nullroute-commits/Test/issues](https://github.com/nullroute-commits/Test/issues)
-- Documentation: See the `docs/` directory for detailed documentation
+- Built with modern Python 3.12.5 features
+- Uses latest Ansible 10.5.0 for infrastructure automation
+- Implements enterprise best practices for CI/CD
+- Docker Compose for consistent environments across all stages
+
+## 📞 Support
+
+- **Documentation**: [docs/](docs/)
+- **Issues**: [GitHub Issues](https://github.com/your-org/enterprise-app/issues)
+- **Email**: support@example.com
+- **Slack**: [#enterprise-app](https://slack.example.com)
 
 ---
 
-**Last updated:** 2025-08-30 22:40:55 UTC by nullroute-commits
+**Note**: This is a reference implementation demonstrating enterprise-grade CI/CD practices. Adapt the configuration to match your specific requirements and infrastructure.

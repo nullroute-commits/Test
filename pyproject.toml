@@ -1,152 +1,114 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "django-app"
+name = "enterprise-app"
 version = "1.0.0"
-description = "Django 5 Multi-Architecture CI/CD Pipeline with RBAC and Audit Logging"
+description = "Enterprise-grade Python application with CI/CD"
 readme = "README.md"
-license = {file = "LICENSE"}
+requires-python = ">=3.12,<3.13"
+license = {text = "MIT"}
 authors = [
-    {name = "nullroute-commits", email = "nullroute-commits@users.noreply.github.com"},
+    {name = "Your Team", email = "team@enterprise.com"}
 ]
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.12",
-    "Framework :: Django",
-    "Framework :: Django :: 5.0",
-]
-requires-python = ">=3.12"
 dependencies = [
-    "Django==5.0.2",
-    "sqlalchemy==1.4.49",
-    "psycopg2-binary==2.9.9",
-    "python-memcached==1.59",
-    "pika==1.3.2",
-    "gunicorn==21.2.0",
+    "fastapi==0.115.4",
+    "uvicorn[standard]==0.32.1",
+    "pydantic==2.10.2",
+    "pydantic-settings==2.6.1",
+    "sqlalchemy==2.0.36",
+    "alembic==1.14.0",
+    "asyncpg==0.30.0",
+    "redis==5.2.0",
+    "httpx==0.27.2",
+    "structlog==24.4.0",
+    "prometheus-client==0.21.0",
+    "opentelemetry-api==1.28.2",
+    "opentelemetry-sdk==1.28.2",
+    "opentelemetry-instrumentation-fastapi==0.49b2",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "black==23.9.1",
-    "flake8==6.1.0",
-    "mypy==1.5.1",
-    "django-stubs==4.2.6",
-    "sqlalchemy-stubs==0.4.0",
-    "django-debug-toolbar==4.2.0",
-    "pytest==7.4.3",
-    "pytest-django==4.7.0",
+    "pytest==8.3.4",
+    "pytest-asyncio==0.24.0",
+    "pytest-cov==6.0.0",
+    "pytest-mock==3.14.0",
+    "black==24.10.0",
+    "ruff==0.8.1",
+    "mypy==1.13.0",
+    "pre-commit==4.0.1",
+    "faker==33.0.0",
+    "factory-boy==3.3.1",
+    "httpx==0.27.2",
 ]
-test = [
-    "pytest==7.4.3",
-    "pytest-django==4.7.0",
-    "pytest-cov==4.1.0",
-    "factory-boy==3.3.0",
+security = [
+    "bandit[toml]==1.8.0",
+    "safety==3.2.8",
+    "pip-audit==2.7.3",
 ]
-prod = [
-    "sentry-sdk==1.30.0",
-    "django-pylibmc==0.6.1",
-    "pylibmc==1.6.3",
-    "uwsgi==2.0.22",
+docs = [
+    "mkdocs==1.6.1",
+    "mkdocs-material==9.5.47",
+    "mkdocstrings[python]==0.27.0",
 ]
 
-[project.urls]
-Homepage = "https://github.com/nullroute-commits/Test"
-Repository = "https://github.com/nullroute-commits/Test"
-Issues = "https://github.com/nullroute-commits/Test/issues"
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.black]
-line-length = 120
+line-length = 88
 target-version = ['py312']
 include = '\.pyi?$'
-extend-exclude = '''
-/(
-  # directories
-  \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | venv
-  | _build
-  | buck-out
-  | build
-  | dist
-  | migrations
-)/
-'''
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-line_length = 120
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-ensure_newline_before_comments = true
-known_django = "django"
-known_first_party = ["app", "config"]
-sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "ARG", # flake8-unused-arguments
+    "SIM", # flake8-simplify
+]
+ignore = []
+fixable = ["ALL"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "config.settings.testing"
-python_files = ["tests.py", "test_*.py", "*_tests.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
-addopts = """
-    --strict-markers
-    --strict-config
-    --verbose
-    --tb=short
-    --cov=app
-    --cov-report=html
-    --cov-report=term
-    --cov-fail-under=80
-    --no-migrations
-    --reuse-db
-"""
-testpaths = ["tests"]
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "integration: marks tests as integration tests",
-    "unit: marks tests as unit tests",
-    "security: marks tests as security tests",
+minversion = "8.0"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--cov=src",
+    "--cov-branch",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-report=html",
+    "--cov-report=xml",
 ]
+testpaths = ["tests"]
+pythonpath = ["."]
 
 [tool.coverage.run]
-source = ["app"]
-omit = [
-    "*/migrations/*",
-    "*/tests/*",
-    "*/venv/*",
-    "*/env/*",
-    "manage.py",
-    "*/settings/*",
-]
+source = ["src"]
+branch = true
 
 [tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if self.debug:",
-    "if settings.DEBUG",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if 0:",
-    "if __name__ == .__main__.:",
-    "class .*\bProtocol\):",
-    "@(abc\.)?abstractmethod",
-]
+precision = 2
+show_missing = true
+skip_covered = true
 
 [tool.bandit]
-exclude_dirs = ["tests", "migrations"]
-skips = ["B101", "B601"]
-
-[tool.bandit.assert_used]
-skips = ["*/tests/*", "*/test_*.py"]
+targets = ["src"]
+skips = ["B101"]  # skip assert_used test

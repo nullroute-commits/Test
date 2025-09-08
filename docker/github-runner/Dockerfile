@@ -1,7 +1,7 @@
 # GitHub Actions Runner Dockerfile
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
-ARG RUNNER_VERSION="2.319.1"
+ARG RUNNER_VERSION="2.321.0"
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies
@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y \
     python3.12-dev \
     python3.12-venv \
     python3-pip \
+    python3.12-distutils \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Docker CLI
@@ -58,8 +59,8 @@ RUN curl -o actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz -L \
 # Install Python dependencies for CI/CD
 RUN python3.12 -m pip install --user --upgrade pip && \
     python3.12 -m pip install --user \
-    ansible==9.9.0 \
-    ansible-core==2.16.10 \
+    ansible==10.5.0 \
+    ansible-core==2.17.5 \
     docker \
     docker-compose \
     pytest \

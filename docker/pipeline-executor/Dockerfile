@@ -1,5 +1,5 @@
 # Pipeline Executor Dockerfile
-FROM python:3.12-slim
+FROM python:3.12.5-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -18,8 +18,8 @@ COPY pyproject.toml /tmp/
 RUN cd /tmp && \
     pip install --no-cache-dir -e ".[dev,security,docs]" && \
     pip install --no-cache-dir \
-    ansible==9.9.0 \
-    ansible-core==2.16.10 \
+    ansible==10.5.0 \
+    ansible-core==2.17.5 \
     docker-py \
     pre-commit
 

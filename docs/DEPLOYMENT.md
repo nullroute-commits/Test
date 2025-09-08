@@ -24,9 +24,9 @@ Our deployment pipeline uses:
 
 ### Required Tools
 
-- Docker Engine 24.0+
-- Docker Compose v2.20+
-- Ansible 9.9.0+
+- Docker Engine 27.2.0+
+- Docker Compose v2.29.2+
+- Ansible 10.5.0
 - Access to target environment
 - Proper credentials in vault
 

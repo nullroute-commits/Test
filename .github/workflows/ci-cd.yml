@@ -9,7 +9,7 @@ on:
     types: [created]
 
 env:
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.12.5"
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
 
@@ -19,7 +19,7 @@ jobs:
     name: Code Quality & Security
     runs-on: [self-hosted, docker]
     container:
-      image: python:3.12-slim
+      image: python:3.12.5-slim
       options: --user root
     steps:
       - name: Checkout code
@@ -64,7 +64,7 @@ jobs:
         environment: [dev, test]
     services:
       postgres:
-        image: postgres:16-alpine
+        image: postgres:17-alpine
         env:
           POSTGRES_USER: test_user
           POSTGRES_PASSWORD: test_password
@@ -75,7 +75,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       redis:
-        image: redis:7-alpine
+        image: redis:7.4-alpine
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s

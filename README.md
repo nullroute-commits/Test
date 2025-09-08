@@ -4,11 +4,11 @@ A production-grade CI/CD pipeline implementation using Python 3.12, Docker Compo
 
 ## 🚀 Features
 
-- **Python 3.12** with modern async/await patterns and type hints
+- **Python 3.12.5** (latest stable) with modern async/await patterns and type hints
 - **Docker Compose** for consistent environment management
 - **Multi-environment support** (dev, test, staging, prod) with PATH-scoped configurations
 - **Comprehensive CI/CD** with GitHub Actions, GitLab CI, and Jenkins support
-- **Infrastructure as Code** using Ansible 9.9.0 (latest stable)
+- **Infrastructure as Code** using Ansible 10.5.0 (latest stable)
 - **Security-first approach** with automated scanning and policy enforcement
 - **Enterprise-grade monitoring** with Prometheus, Grafana, and distributed tracing
 - **Automated testing** including unit, integration, E2E, and performance tests
@@ -16,9 +16,9 @@ A production-grade CI/CD pipeline implementation using Python 3.12, Docker Compo
 
 ## 📋 Prerequisites
 
-- Docker Engine 24.0+ and Docker Compose v2.20+
-- Python 3.12+
-- Ansible 9.9.0+ (ansible-core 2.16.10+)
+- Docker Engine 27.2.0+ and Docker Compose v2.29.2+
+- Python 3.12.5
+- Ansible 10.5.0 (ansible-core 2.17.5)
 - Make (for automation)
 - Git
 
@@ -325,8 +325,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Built with modern Python 3.12 features
-- Uses latest Ansible 9.9.0 for infrastructure automation
+- Built with modern Python 3.12.5 features
+- Uses latest Ansible 10.5.0 for infrastructure automation
 - Implements enterprise best practices for CI/CD
 - Docker Compose for consistent environments across all stages
 

@@ -55,7 +55,7 @@ services:
 
   # Test-specific services
   selenium:
-    image: selenium/standalone-chrome:latest
+    image: selenium/standalone-chrome:131.0
     container_name: enterprise-selenium-test
     ports:
       - "4444:4444"

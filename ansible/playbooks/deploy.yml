@@ -50,7 +50,7 @@
 
     # Docker deployment
     - name: Log in to Docker registry
-      docker_login:
+      community.docker.docker_login:
         registry_url: "{{ docker_registry }}"
         username: "{{ docker_registry_user | default(omit) }}"
         password: "{{ docker_registry_password | default(omit) }}"
@@ -58,7 +58,7 @@
       no_log: true
 
     - name: Pull Docker image
-      docker_image:
+      community.docker.docker_image:
         name: "{{ docker_registry }}/{{ app_name }}:{{ app_version }}"
         source: pull
         force_source: yes
@@ -77,7 +77,7 @@
 
     # Database migrations
     - name: Run database migrations
-      docker_container:
+      community.docker.docker_container:
         name: "{{ app_name }}-migrate"
         image: "{{ docker_registry }}/{{ app_name }}:{{ app_version }}"
         command: alembic upgrade head
@@ -93,7 +93,7 @@
 
     # Deploy application
     - name: Deploy application containers
-      docker_compose:
+      community.docker.docker_compose:
         project_src: "{{ deploy_path }}/config"
         state: present
         restarted: yes

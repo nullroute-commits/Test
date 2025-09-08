@@ -4,7 +4,7 @@ version: '3.9'
 services:
   # GitLab Runner
   gitlab-runner:
-    image: gitlab/gitlab-runner:alpine
+    image: gitlab/gitlab-runner:v17.5.3
     container_name: gitlab-runner
     restart: unless-stopped
     volumes:
@@ -14,7 +14,7 @@ services:
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
       - RUNNER_EXECUTOR=docker
-      - DOCKER_IMAGE=python:3.12-slim
+      - DOCKER_IMAGE=python:3.12.5-slim
       - DOCKER_VOLUMES=/var/run/docker.sock:/var/run/docker.sock
     networks:
       - ci-network
@@ -42,7 +42,7 @@ services:
 
   # Jenkins Agent
   jenkins-agent:
-    image: jenkins/inbound-agent:alpine
+    image: jenkins/inbound-agent:3273.v4cfe589b_fd83-1
     container_name: jenkins-agent
     restart: unless-stopped
     environment:
@@ -58,7 +58,7 @@ services:
 
   # SonarQube for code quality
   sonarqube:
-    image: sonarqube:community
+    image: sonarqube:25.9.0-community
     container_name: sonarqube
     restart: unless-stopped
     ports:
@@ -89,7 +89,7 @@ services:
 
   # Container Registry (Harbor)
   harbor-registry:
-    image: goharbor/registry-photon:latest
+    image: goharbor/registry-photon:v2.11.1
     container_name: harbor-registry
     restart: unless-stopped
     ports:

@@ -1,123 +1,72 @@
-# Multi-stage Dockerfile for Django 5 application
-# Supports multi-architecture builds with Python 3.12.5
-# Last updated: 2025-08-30 22:40:55 UTC by nullroute-commits
-
-ARG PYTHON_VERSION=3.12.5
-ARG BUILDPLATFORM=linux/amd64
-ARG TARGETPLATFORM=linux/amd64
-
-# Base stage with Python and system dependencies
-FROM python:${PYTHON_VERSION}-slim as base
+# Multi-stage Dockerfile for Python 3.12 application
+# Stage 1: Build stage
+FROM python:3.12-slim as builder
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    DEBIAN_FRONTEND=noninteractive \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
-
-# Set work directory
-WORKDIR /app
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_DEFAULT_TIMEOUT=100 \
+    POETRY_VERSION=1.8.3
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    libpq-dev \
-    libbz2-dev \
-    libffi-dev \
-    libssl-dev \
-    libxml2-dev \
-    libxslt-dev \
-    zlib1g-dev \
-    libjpeg-dev \
-    libpng-dev \
     curl \
-    wget \
     git \
-    netcat-openbsd \
-    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Create app user
-RUN groupadd -r app && useradd -r -g app app
+# Create app directory
+WORKDIR /app
 
-# Development stage
-FROM base as development
+# Copy dependency files
+COPY pyproject.toml ./
 
-# Install development dependencies
-COPY requirements/development.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+# Install Python dependencies
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install .
+
+# Stage 2: Runtime stage
+FROM python:3.12-slim as runtime
+
+# Create non-root user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/app/.venv/bin:$PATH" \
+    PYTHONPATH="/app/src:$PYTHONPATH"
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app directory
+WORKDIR /app
+
+# Copy Python dependencies from builder
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy application code
-COPY . /app/
+COPY --chown=appuser:appuser . .
 
 # Create necessary directories
-RUN mkdir -p /app/logs /app/staticfiles /app/media && \
-    chown -R app:app /app
+RUN mkdir -p /app/logs /app/tmp && \
+    chown -R appuser:appuser /app
 
-# Set permissions for entrypoint script
-COPY docker-entrypoint-dev.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Switch to non-root user
+USER appuser
 
-USER app
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
 
+# Expose port
 EXPOSE 8000
 
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-
-# Testing stage
-FROM base as testing
-
-# Install test dependencies
-COPY requirements/test.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
-
-# Copy application code
-COPY . /app/
-
-# Create necessary directories
-RUN mkdir -p /app/logs /app/staticfiles /app/media && \
-    chown -R app:app /app
-
-# Set permissions for entrypoint script
-COPY docker-entrypoint-test.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-USER app
-
-EXPOSE 8000
-
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["python", "manage.py", "test"]
-
-# Production stage
-FROM base as production
-
-# Install production dependencies
-COPY requirements/production.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
-
-# Copy application code
-COPY . /app/
-
-# Create necessary directories and set permissions
-RUN mkdir -p /app/logs /app/staticfiles /app/media && \
-    chown -R app:app /app
-
-# Collect static files
-RUN python manage.py collectstatic --noinput || true
-
-# Set permissions for entrypoint script
-COPY docker-entrypoint-prod.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-USER app
-
-EXPOSE 8000
-
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "sync", "--max-requests", "1000", "--timeout", "30", "config.wsgi:application"]
-
-# Default stage (production)
-FROM production
+# Default command (can be overridden in docker-compose)
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

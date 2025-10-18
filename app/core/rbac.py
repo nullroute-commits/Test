@@ -259,7 +259,7 @@ class RBACManager:
                 if permissions:
                     permission_objects = session.query(Permission).filter(
                         Permission.name.in_(permissions),
-                        Permission.is_active
+                        Permission.is_active.is_(True)
                     ).all()
                     role.permissions.extend(permission_objects)
 

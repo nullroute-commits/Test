@@ -2,7 +2,6 @@
 
 import logging
 import sys
-from typing import Any
 
 import structlog
 from pythonjsonlogger import jsonlogger
@@ -16,7 +15,7 @@ def setup_logging() -> structlog.BoundLogger:
     """Set up structured logging."""
     # Configure Python logging
     log_level = getattr(logging, settings.log_level.upper())
-    
+
     # Create formatter based on environment
     if settings.log_format == "json":
         formatter = jsonlogger.JsonFormatter(
@@ -27,20 +26,20 @@ def setup_logging() -> structlog.BoundLogger:
         formatter = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         )
-    
+
     # Configure root logger
     root_logger = logging.getLogger()
     root_logger.setLevel(log_level)
-    
+
     # Remove existing handlers
     for handler in root_logger.handlers[:]:
         root_logger.removeHandler(handler)
-    
+
     # Add console handler
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(formatter)
     root_logger.addHandler(console_handler)
-    
+
     # Configure structlog
     structlog.configure(
         processors=[
@@ -68,6 +67,6 @@ def setup_logging() -> structlog.BoundLogger:
         logger_factory=structlog.stdlib.LoggerFactory(),
         cache_logger_on_first_use=True,
     )
-    
+
     # Return configured logger
     return structlog.get_logger()

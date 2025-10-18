@@ -7,7 +7,6 @@ from typing import AsyncGenerator, Generator
 import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -47,15 +46,15 @@ async def test_engine(test_settings):
         poolclass=StaticPool,
         echo=test_settings.database_echo,
     )
-    
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     yield engine
-    
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
-    
+
     await engine.dispose()
 
 
@@ -67,7 +66,7 @@ async def test_session(test_engine) -> AsyncGenerator[AsyncSession, None]:
         class_=AsyncSession,
         expire_on_commit=False,
     )
-    
+
     async with TestSessionLocal() as session:
         yield session
         await session.rollback()
@@ -79,10 +78,10 @@ def client(test_session, test_settings) -> Generator[TestClient, None, None]:
     # Override dependencies
     app.dependency_overrides[get_settings] = lambda: test_settings
     app.dependency_overrides[get_db] = lambda: test_session
-    
+
     with TestClient(app) as test_client:
         yield test_client
-    
+
     # Clear overrides
     app.dependency_overrides.clear()
 
@@ -100,7 +99,7 @@ def auth_headers(client) -> dict[str, str]:
         },
     )
     assert response.status_code == 201
-    
+
     # Login to get token
     response = client.post(
         "/api/v1/auth/login",
@@ -111,7 +110,7 @@ def auth_headers(client) -> dict[str, str]:
     )
     assert response.status_code == 200
     token = response.json()["access_token"]
-    
+
     return {"Authorization": f"Bearer {token}"}
 
 
@@ -124,9 +123,9 @@ def reset_test_data():
         import shutil
         shutil.rmtree(test_upload_dir)
     os.makedirs(test_upload_dir, exist_ok=True)
-    
+
     yield
-    
+
     # Cleanup after test
     if os.path.exists(test_upload_dir):
         import shutil

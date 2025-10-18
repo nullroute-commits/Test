@@ -29,18 +29,18 @@ async def lifespan(app: FastAPI):
         "environment": settings.environment,
         "version": get_version_info()["version"],
     })
-    
+
     # Initialize database
     # await init_database()
-    
+
     # Initialize cache
     # await init_cache()
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down application")
-    
+
     # Cleanup
     # await cleanup_database()
     # await cleanup_cache()
@@ -99,7 +99,7 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
         },
         exc_info=True,
     )
-    
+
     if settings.debug:
         return JSONResponse(
             status_code=500,
@@ -108,7 +108,7 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
                 "type": type(exc).__name__,
             },
         )
-    
+
     return JSONResponse(
         status_code=500,
         content={"detail": "Internal server error"},
@@ -134,7 +134,7 @@ async def version() -> dict[str, Any]:
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     uvicorn.run(
         "src.api.main:app",
         host=settings.api_host,

@@ -8,7 +8,7 @@ from src.core.config import Settings
 
 class TestSettings:
     """Test Settings configuration."""
-    
+
     def test_default_settings(self):
         """Test default settings values."""
         settings = Settings(
@@ -16,12 +16,12 @@ class TestSettings:
             database_url="postgresql://user:pass@localhost/db",
             redis_url="redis://localhost:6379/0",
         )
-        
+
         assert settings.app_name == "Enterprise App"
         assert settings.environment == "development"
         assert settings.debug is False
         assert settings.api_port == 8000
-        
+
     def test_environment_validation(self):
         """Test environment validation."""
         # Valid environments
@@ -33,7 +33,7 @@ class TestSettings:
                 redis_url="redis://localhost:6379/0",
             )
             assert settings.environment == env
-        
+
         # Invalid environment
         with pytest.raises(ValidationError) as exc_info:
             Settings(
@@ -43,7 +43,7 @@ class TestSettings:
                 redis_url="redis://localhost:6379/0",
             )
         assert "Environment must be one of" in str(exc_info.value)
-    
+
     def test_allowed_origins_parsing(self):
         """Test allowed origins parsing from string."""
         # String input
@@ -54,7 +54,7 @@ class TestSettings:
             allowed_origins="http://localhost:3000,http://localhost:8080",
         )
         assert settings.allowed_origins == ["http://localhost:3000", "http://localhost:8080"]
-        
+
         # List input
         settings = Settings(
             secret_key="test-key",
@@ -63,7 +63,7 @@ class TestSettings:
             allowed_origins=["http://example.com"],
         )
         assert settings.allowed_origins == ["http://example.com"]
-    
+
     def test_environment_properties(self):
         """Test environment property methods."""
         # Production
@@ -76,19 +76,19 @@ class TestSettings:
         assert settings.is_production is True
         assert settings.is_development is False
         assert settings.is_testing is False
-        
+
         # Development
         settings.environment = "development"
         assert settings.is_production is False
         assert settings.is_development is True
         assert settings.is_testing is False
-        
+
         # Testing
         settings.environment = "testing"
         assert settings.is_production is False
         assert settings.is_development is False
         assert settings.is_testing is True
-    
+
     def test_required_fields(self):
         """Test required fields validation."""
         # Missing secret_key
@@ -98,7 +98,7 @@ class TestSettings:
                 redis_url="redis://localhost:6379/0",
             )
         assert "secret_key" in str(exc_info.value)
-        
+
         # Missing database_url
         with pytest.raises(ValidationError) as exc_info:
             Settings(

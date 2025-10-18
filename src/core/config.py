@@ -1,7 +1,6 @@
 """Application configuration using Pydantic Settings."""
 
 from functools import lru_cache
-from pathlib import Path
 from typing import Any, Optional
 
 from pydantic import Field, PostgresDsn, RedisDsn, field_validator
@@ -23,13 +22,13 @@ class Settings(BaseSettings):
     app_version: str = Field(default="1.0.0", env="APP_VERSION")
     environment: str = Field(default="development", env="ENVIRONMENT")
     debug: bool = Field(default=False, env="DEBUG")
-    
+
     # API Settings
     api_prefix: str = Field(default="/api/v1", env="API_PREFIX")
     api_host: str = Field(default="0.0.0.0", env="API_HOST")
     api_port: int = Field(default=8000, env="API_PORT")
     api_workers: int = Field(default=4, env="API_WORKERS")
-    
+
     # Security
     secret_key: str = Field(..., env="SECRET_KEY")
     access_token_expire_minutes: int = Field(default=30, env="ACCESS_TOKEN_EXPIRE_MINUTES")
@@ -38,26 +37,26 @@ class Settings(BaseSettings):
         default=["http://localhost:3000"],
         env="ALLOWED_ORIGINS"
     )
-    
+
     # Database
     database_url: PostgresDsn = Field(..., env="DATABASE_URL")
     database_pool_size: int = Field(default=20, env="DATABASE_POOL_SIZE")
     database_max_overflow: int = Field(default=0, env="DATABASE_MAX_OVERFLOW")
     database_echo: bool = Field(default=False, env="DATABASE_ECHO")
-    
+
     # Redis
     redis_url: RedisDsn = Field(..., env="REDIS_URL")
     redis_pool_size: int = Field(default=10, env="REDIS_POOL_SIZE")
-    
+
     # Logging
     log_level: str = Field(default="INFO", env="LOG_LEVEL")
     log_format: str = Field(default="json", env="LOG_FORMAT")
-    
+
     # Monitoring
     enable_metrics: bool = Field(default=True, env="ENABLE_METRICS")
     enable_tracing: bool = Field(default=True, env="ENABLE_TRACING")
     jaeger_endpoint: Optional[str] = Field(default=None, env="JAEGER_ENDPOINT")
-    
+
     # Feature Flags
     enable_rate_limiting: bool = Field(default=True, env="ENABLE_RATE_LIMITING")
     rate_limit_requests: int = Field(default=100, env="RATE_LIMIT_REQUESTS")

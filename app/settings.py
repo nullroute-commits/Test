@@ -1,5 +1,5 @@
-"""
-Django settings for the application.
+"""Django settings for the application.
+
 Configuration for Django 5 with SQLAlchemy, PostgreSQL 17, RBAC, and audit logging.
 
 Last updated: 2025-08-30 22:40:55 UTC by nullroute-commits
@@ -163,7 +163,7 @@ LOGGING = {
         'file': {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
-            'maxBytes': 1024*1024*10,  # 10MB
+            'maxBytes': 1024 * 1024 * 10,  # 10MB
             'backupCount': 5,
             'formatter': 'verbose',
         },

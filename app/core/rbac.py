@@ -155,7 +155,7 @@ class RBACManager:
         try:
             with get_db_session() as session:
                 user = session.query(User).filter(User.id == user_id).first()
-                role = session.query(Role).filter(Role.name == role_name, Role.is_active).first()
+                role = session.query(Role).filter(Role.name == role_name, Role.is_active.is_(True)).first()
 
                 if not user or not role:
                     logger.warning(f"User {user_id} or role {role_name} not found")

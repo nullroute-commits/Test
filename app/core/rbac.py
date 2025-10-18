@@ -63,7 +63,7 @@ class RBACManager:
 
             # Superuser has all permissions
             if user.is_superuser:
-                all_permissions = session.query(Permission).filter(Permission.is_active).all()
+                all_permissions = session.query(Permission).filter(Permission.is_active.is_(True)).all()
                 permissions = {perm.name for perm in all_permissions}
             else:
                 # Get permissions from active roles

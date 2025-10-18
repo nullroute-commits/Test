@@ -33,7 +33,7 @@ async def health_check(
             "redis": "unknown",
         },
     }
-    
+
     # Check database
     try:
         result = await db.execute(text("SELECT 1"))
@@ -42,7 +42,7 @@ async def health_check(
     except Exception as e:
         health_status["status"] = "unhealthy"
         health_status["checks"]["database"] = f"unhealthy: {str(e)}"
-    
+
     # Check Redis
     try:
         await redis_client.ping()
@@ -52,7 +52,7 @@ async def health_check(
         health_status["checks"]["redis"] = f"unhealthy: {str(e)}"
     finally:
         await redis_client.close()
-    
+
     return health_status
 
 

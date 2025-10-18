@@ -1,5 +1,5 @@
-"""
-Django settings for the application.
+"""Django settings for the application.
+
 Configuration for Django 5 with SQLAlchemy, PostgreSQL 17, RBAC, and audit logging.
 
 Last updated: 2025-08-30 22:40:55 UTC by nullroute-commits
@@ -80,14 +80,20 @@ DATABASES = {
         'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
         'PORT': os.environ.get('POSTGRES_PORT', '5432'),
         'CONN_MAX_AGE': int(os.environ.get('DATABASE_CONN_MAX_AGE', '600')),
-        'CONN_HEALTH_CHECKS': os.environ.get('DATABASE_CONN_HEALTH_CHECKS', 'True').lower() == 'true',
+        'CONN_HEALTH_CHECKS': (
+            os.environ.get('DATABASE_CONN_HEALTH_CHECKS', 'True').lower()
+            == 'true'
+        ),
     }
 }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'UserAttributeSimilarityValidator'
+        ),
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
@@ -182,11 +188,17 @@ LOGGING = {
 }
 
 # Security settings
-SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+SECURE_SSL_REDIRECT = (
+    os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+)
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
-SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
-CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False').lower() == 'true'
+SESSION_COOKIE_SECURE = (
+    os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
+)
+CSRF_COOKIE_SECURE = (
+    os.environ.get('CSRF_COOKIE_SECURE', 'False').lower() == 'true'
+)
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 
@@ -197,5 +209,9 @@ RBAC_SESSION_TIMEOUT = int(os.environ.get('RBAC_SESSION_TIMEOUT', '3600'))
 # Audit logging settings
 AUDIT_ENABLED = os.environ.get('AUDIT_ENABLED', 'True').lower() == 'true'
 AUDIT_LOG_MODELS = os.environ.get('AUDIT_LOG_MODELS', 'True').lower() == 'true'
-AUDIT_LOG_REQUESTS = os.environ.get('AUDIT_LOG_REQUESTS', 'True').lower() == 'true'
-AUDIT_LOG_AUTHENTICATION = os.environ.get('AUDIT_LOG_AUTHENTICATION', 'True').lower() == 'true'
+AUDIT_LOG_REQUESTS = (
+    os.environ.get('AUDIT_LOG_REQUESTS', 'True').lower() == 'true'
+)
+AUDIT_LOG_AUTHENTICATION = (
+    os.environ.get('AUDIT_LOG_AUTHENTICATION', 'True').lower() == 'true'
+)

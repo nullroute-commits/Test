@@ -7,7 +7,6 @@ Last updated: 2025-08-30 22:40:55 UTC by nullroute-commits
 from django.urls import path
 from django.http import JsonResponse
 
-
 def home_view(request):
     """Render basic home view."""
     return JsonResponse({

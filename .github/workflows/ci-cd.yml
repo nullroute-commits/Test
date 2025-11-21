@@ -9,7 +9,7 @@ on:
     types: [created]
 
 env:
-  PYTHON_VERSION: "3.12.5"
+  PYTHON_VERSION: "3.13.0"
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
 
@@ -19,7 +19,7 @@ jobs:
     name: Code Quality & Security
     runs-on: [self-hosted, docker]
     container:
-      image: python:3.12.5-slim
+      image: python:3.13-slim
       options: --user root
     steps:
       - name: Checkout code
@@ -225,7 +225,7 @@ jobs:
             -v ${{ github.workspace }}:/workspace \
             -v ~/.ssh:/root/.ssh:ro \
             -e ANSIBLE_HOST_KEY_CHECKING=False \
-            python:3.12-slim bash -c "
+            python:3.13-slim bash -c "
               pip install ansible==9.9.0 ansible-core==2.16.10
               cd /workspace
               ansible-playbook \

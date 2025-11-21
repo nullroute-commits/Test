@@ -37,7 +37,7 @@ pipeline {
                 stage('Lint') {
                     steps {
                         script {
-                            docker.image('python:3.12.5-slim').inside {
+                            docker.image('python:3.13-slim').inside {
                                 sh '''
                                     pip install -e ".[dev]"
                                     black --check src tests

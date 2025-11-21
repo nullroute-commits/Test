@@ -9,7 +9,7 @@ services:
       context: .
       dockerfile: ci/Dockerfile.ci
       args:
-        - PYTHON_VERSION=3.12.5
+        - PYTHON_VERSION=3.13.0
         - BUILDPLATFORM=${DOCKER_PLATFORM:-linux/amd64}
         - TARGETPLATFORM=${DOCKER_PLATFORM:-linux/amd64}
     volumes:

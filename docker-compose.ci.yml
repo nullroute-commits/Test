@@ -14,7 +14,7 @@ services:
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
       - RUNNER_EXECUTOR=docker
-      - DOCKER_IMAGE=python:3.12.5-slim
+      - DOCKER_IMAGE=python:3.13-slim
       - DOCKER_VOLUMES=/var/run/docker.sock:/var/run/docker.sock
     networks:
       - ci-network

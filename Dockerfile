@@ -1,6 +1,6 @@
-# Multi-stage Dockerfile for Python 3.12.5 application
+# Multi-stage Dockerfile for Python 3.13.0 application
 # Stage 1: Build stage
-FROM python:3.12.5-slim as builder
+FROM python:3.13-slim as builder
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -28,7 +28,7 @@ RUN pip install --upgrade pip setuptools wheel && \
     pip install .
 
 # Stage 2: Runtime stage
-FROM python:3.12.5-slim as runtime
+FROM python:3.13-slim as runtime
 
 # Create non-root user
 RUN groupadd -r appuser && useradd -r -g appuser appuser
@@ -48,7 +48,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Copy Python dependencies from builder
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy application code

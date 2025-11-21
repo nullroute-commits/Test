@@ -20,11 +20,11 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     libssl-dev \
     libffi-dev \
-    python3.12 \
-    python3.12-dev \
-    python3.12-venv \
+    python3.13 \
+    python3.13-dev \
+    python3.13-venv \
     python3-pip \
-    python3.12-distutils \
+    python3.13-distutils \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Docker CLI
@@ -57,8 +57,8 @@ RUN curl -o actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz -L \
     rm actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
 
 # Install Python dependencies for CI/CD
-RUN python3.12 -m pip install --user --upgrade pip && \
-    python3.12 -m pip install --user \
+RUN python3.13 -m pip install --user --upgrade pip && \
+    python3.13 -m pip install --user \
     ansible==10.5.0 \
     ansible-core==2.17.5 \
     docker \

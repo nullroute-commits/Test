@@ -1,6 +1,6 @@
 # Pre-commit hooks configuration
 default_language_version:
-  python: python3.12
+  python: python3.13
 
 repos:
   # General hooks
@@ -33,7 +33,7 @@ repos:
     rev: 24.10.0
     hooks:
       - id: black
-        language_version: python3.12
+        language_version: python3.13
         args: ['--line-length=88']
 
   # Python import sorting

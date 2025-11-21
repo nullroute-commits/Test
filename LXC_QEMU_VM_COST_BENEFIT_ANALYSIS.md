@@ -19,8 +19,8 @@ This document provides a comprehensive cost-benefit analysis for adding **LXC (L
 | **Deployment Options** | Docker only | Docker + LXC + VMs | +2 platforms |
 | **Resource Efficiency** | Good | Excellent (LXC) | 20-30% improvement |
 | **Isolation Level** | Container | Container + Full VM | Enhanced security |
-| **Initial Investment** | - | $45,000 - $75,000 | High upfront cost |
-| **Annual Savings** | - | $25,000 - $45,000 | 2-3 year payback |
+| **Initial Investment** | - | $60,720 - $108,905 | High upfront cost |
+| **Annual Savings** | - | $30,000 - $50,000 | 2-3 year payback |
 | **Complexity** | Medium | High | Increased overhead |
 | **Risk Level** | - | 🟡 MEDIUM | Manageable with planning |
 
@@ -253,9 +253,9 @@ qm destroy 200
 Low Isolation                                    High Isolation
 ├────────┼────────┼────────┼────────┼────────┼────────┤
 │        │        │        │        │        │        │
-Docker   Docker   LXC      LXC      QEMU/KVM  QEMU/KVM
-(shared  (user    (unpri-  (user    (standard) (nested
- namespaces)      vileged) namespace)         virt)
+Docker   Docker   LXC           LXC      QEMU/KVM  QEMU/KVM
+(shared  (user    (unprivileged (user    (standard) (nested
+ namespaces)      )         namespace)         virt)
 ```
 
 **Security Benefits:**

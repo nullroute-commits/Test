@@ -1,5 +1,11 @@
 #!/usr/bin/env python
-"""Django's command-line utility for administrative tasks."""
+"""Django's command-line utility for administrative tasks.
+
+⚠️ LEGACY CODE WARNING:
+This file is part of the legacy Django implementation in app/ directory.
+It is NOT used in production. The production system uses FastAPI.
+See app/README.md for more information.
+"""
 import os
 import sys
 

@@ -1,8 +1,10 @@
 # Database Design Documentation
 
-This document describes the database design for the Django 5 Multi-Architecture CI/CD Pipeline application.
+This document describes the database design for the FastAPI Enterprise CI/CD Pipeline application with Python 3.13.
 
-**Last updated:** 2025-08-30 22:40:55 UTC by nullroute-commits
+**Last updated:** 2025-12-04 UTC
+
+**Note:** The current FastAPI implementation uses async SQLAlchemy with PostgreSQL. The database models are defined using SQLAlchemy's async ORM with declarative base.
 
 ## Table of Contents
 
@@ -18,16 +20,16 @@ This document describes the database design for the Django 5 Multi-Architecture 
 
 ## Overview
 
-The application uses PostgreSQL 17.2 as the primary database with SQLAlchemy 1.4.49 as the ORM layer. The database design follows best practices for security, performance, and maintainability.
+The application uses PostgreSQL 17 as the primary database with async SQLAlchemy 2.0.36 as the ORM layer. The database design follows best practices for async operations, security, performance, and maintainability.
 
 ### Key Features
 
+- **Async Operations:** Full async/await support with asyncpg driver
 - **ACID Compliance:** Full transactional integrity
 - **UUID Primary Keys:** For security and distributed systems
-- **Audit Trail:** Comprehensive change tracking
-- **RBAC Support:** Role-based access control
-- **Performance Optimized:** Proper indexing and query optimization
-- **Multi-tenant Ready:** Designed for scalability
+- **Modern SQLAlchemy 2.0:** Declarative models with async support
+- **Connection Pooling:** Optimized async connection management
+- **Migration Support:** Alembic for database schema migrations
 
 ## Database Technology
 
@@ -61,7 +63,14 @@ services:
 
 ## Schema Design
 
-### Entity Relationship Diagram
+> **⚠️ Important Note:** The schema shown below represents a planned/legacy design from a previous Django implementation. 
+> The current FastAPI application (in `src/`) uses a minimal database schema with async SQLAlchemy models. 
+> The models shown here exist in the legacy Django code (`app/core/models.py`) but are not currently used in the deployed application.
+> 
+> **Current State:** The FastAPI application has a basic database configuration (`src/core/database.py`) but models are yet to be fully implemented.
+> See `src/core/database.py` for the current async SQLAlchemy setup.
+
+### Legacy Entity Relationship Diagram (Django Models in app/)
 
 ```sql
                     ┌─────────────────────────────┐
@@ -176,9 +185,13 @@ services:
     └─────────────────────────────────────────────────────────────────┘
 ```
 
-## Core Models
+## Core Models (Legacy Django Implementation)
 
-### Users Table
+> **Note:** These SQL schemas correspond to the Django models in `app/core/models.py`. 
+> They are not currently used in the deployed FastAPI application. 
+> This documentation is retained for reference and future implementation planning.
+
+### Users Table (Legacy)
 
 ```sql
 CREATE TABLE users (
@@ -651,4 +664,63 @@ LIMIT 10;
 
 ---
 
-This database design provides a solid foundation for the Django application with proper security, performance optimization, and maintainability considerations built in from the ground up.
+## Current FastAPI Implementation
+
+### Database Configuration (src/core/database.py)
+
+The current FastAPI application uses async SQLAlchemy 2.0 with the following setup:
+
+```python
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+# Async engine with connection pooling
+engine = create_async_engine(
+    database_url,  # PostgreSQL with asyncpg driver
+    echo=False,
+    pool_size=20,
+    max_overflow=0,
+    pool_pre_ping=True,  # Health checks
+)
+
+# Async session factory
+AsyncSessionLocal = sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
+
+# Declarative base for models
+Base = declarative_base()
+```
+
+### Migration Support
+
+The application uses Alembic for database migrations:
+
+```bash
+# Create a new migration
+alembic revision --autogenerate -m "description"
+
+# Apply migrations
+alembic upgrade head
+
+# Rollback migrations
+alembic downgrade -1
+```
+
+### Future Implementation
+
+Models will be implemented in `src/models/` directory using async SQLAlchemy with:
+- Async CRUD operations
+- Pydantic schema validation
+- FastAPI dependency injection
+- Connection pooling and health checks
+- Alembic migrations for schema changes
+
+The legacy Django models shown above can serve as a reference for future implementation but will be adapted for async operations and FastAPI patterns.
+
+---
+
+This database design documentation covers both the legacy Django implementation (for reference) and the current FastAPI async setup. Future models will be implemented following FastAPI and async SQLAlchemy best practices.

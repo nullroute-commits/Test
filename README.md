@@ -26,10 +26,12 @@ A production-grade CI/CD pipeline implementation using Python 3.13, Docker Compo
 
 ```
 enterprise-app/
-├── src/                    # Application source code
+├── src/                    # Application source code (CURRENT - FastAPI)
 │   ├── api/               # FastAPI application
 │   ├── core/              # Core business logic
 │   └── utils/             # Utility functions
+├── app/                    # ⚠️ LEGACY Django code (see app/README.md)
+│   └── core/              # Not used in production
 ├── tests/                  # Test suites
 │   ├── unit/              # Unit tests
 │   ├── integration/       # Integration tests
@@ -47,13 +49,13 @@ enterprise-app/
 │   ├── playbooks/         # Deployment playbooks
 │   ├── inventories/       # Environment inventories
 │   └── roles/             # Reusable roles
-├── ci-cd/                  # CI/CD configurations
-│   ├── github-actions/    # GitHub Actions workflows
-│   └── gitlab-ci/         # GitLab CI templates
-└── monitoring/            # Monitoring configurations
-    ├── prometheus/        # Prometheus configs
-    └── grafana/           # Grafana dashboards
+├── requirements/           # ⚠️ LEGACY Django deps (see requirements/README.md)
+├── pyproject.toml          # ✅ CURRENT dependencies (use this)
+└── .github/workflows/     # CI/CD configurations
 ```
+
+> **⚠️ Important:** The `app/` directory contains legacy Django code that is NOT used in production. 
+> The production system uses FastAPI code in `src/`. See `app/README.md` for details.
 
 ## 🚀 Quick Start
 

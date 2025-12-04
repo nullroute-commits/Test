@@ -1,5 +1,24 @@
 # Line-by-Line Documentation Verification Matrix
 
+> **⚠️ OUTDATED VERIFICATION - 2025-12-04 UPDATE:**
+> 
+> This verification matrix is **OUTDATED** and verifies the **LEGACY DJANGO CODE** in `app/`, not the actual production FastAPI code.
+> 
+> **What This Document Verifies:**
+> - Django models in `app/core/models.py` (legacy, not deployed)
+> - Database schema for Django implementation
+> - Code that exists but is NOT used in production
+> 
+> **What Should Be Verified:**
+> - FastAPI application in `src/api/main.py`
+> - Async SQLAlchemy setup in `src/core/database.py`
+> - Pydantic models and schemas (when implemented)
+> 
+> **This document is retained for historical reference only.**
+> See `app/README.md` for information about the legacy Django code.
+
+---
+
 This document provides a detailed line-by-line cross-reference between documentation and code implementation.
 
 ---

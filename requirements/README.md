@@ -66,13 +66,13 @@ pip install -e ".[dev]"
 
 The Django requirements have these conflicts with FastAPI requirements:
 
-| Package | Django (Legacy) | FastAPI (Current) |
-|---------|----------------|-------------------|
-| Web Framework | Django 5.0.2 | FastAPI 0.115.4 |
-| Server | Gunicorn/uWSGI | Uvicorn |
-| SQLAlchemy | 1.4.49 | 2.0.36 (async) |
-| Cache | Memcached | Redis |
-| Queue | RabbitMQ (pika) | Async workers |
+| Package | Django (Legacy) | FastAPI (Current)
+|---------|----------------|-------------------
+| Web Framework | Django 5.0.2 | FastAPI 0.115.4
+| Server | Gunicorn/uWSGI | Uvicorn
+| SQLAlchemy | 1.4.49 | 2.0.36 (async)
+| Cache | Memcached | Redis
+| Queue | RabbitMQ (pika) | Async workers
 
 You cannot install both sets of dependencies simultaneously without conflicts.
 

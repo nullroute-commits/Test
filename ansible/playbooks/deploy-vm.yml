@@ -1,0 +1,146 @@
+---
+- name: Deploy Application to QEMU VM
+  hosts: proxmox_cluster
+  gather_facts: yes
+  vars:
+    app_name: enterprise-app
+    deploy_user: "{{ ansible_user | default('deploy') }}"
+    
+  pre_tasks:
+    - name: Validate deployment environment
+      assert:
+        that:
+          - environment is defined
+          - app_version is defined
+          - qemu_vmid is defined
+          - qemu_name is defined
+        fail_msg: "Required variables not defined"
+    
+    - name: Display deployment information
+      debug:
+        msg: |
+          Deploying {{ app_name }} version {{ app_version }}
+          Environment: {{ environment }}
+          Target: QEMU VM {{ qemu_vmid }} ({{ qemu_name }})
+
+  roles:
+    - role: proxmox-common
+      tags: proxmox
+    
+    - role: qemu-vm
+      tags: qemu
+
+  tasks:
+    - name: Wait for cloud-init to complete (if enabled)
+      wait_for:
+        timeout: 120
+      when: qemu_cloudinit | bool
+      tags: cloudinit
+
+    - name: Get VM IP address from cloud-init
+      shell: |
+        qm guest exec {{ qemu_vmid }} -- ip -4 addr show | grep inet | grep -v 127.0.0.1 | awk '{print $2}' | cut -d/ -f1 | head -1
+      register: vm_ip_result
+      delegate_to: "{{ proxmox_api_host }}"
+      when: qemu_cloudinit | bool and qemu_ipconfig0 == "ip=dhcp"
+      tags: network
+
+    - name: Set VM IP fact
+      set_fact:
+        qemu_vm_ip: "{{ vm_ip_result.stdout if qemu_cloudinit and qemu_ipconfig0 == 'ip=dhcp' else qemu_ipconfig0.split('=')[1].split('/')[0] }}"
+      when: qemu_cloudinit | bool
+      tags: network
+
+    - name: Add VM to inventory
+      add_host:
+        name: "{{ qemu_name }}"
+        ansible_host: "{{ qemu_vm_ip }}"
+        groups: qemu_vms
+      when: qemu_cloudinit | bool
+      tags: inventory
+
+- name: Configure and deploy application in QEMU VM
+  hosts: qemu_vms
+  gather_facts: yes
+  become: yes
+  
+  tasks:
+    - name: Update package cache
+      package:
+        update_cache: yes
+      tags: setup
+
+    - name: Install required packages
+      package:
+        name:
+          - python3
+          - python3-pip
+          - python3-venv
+          - git
+          - curl
+          - docker.io
+        state: present
+      tags: setup
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+      tags: setup
+
+    - name: Create application directory
+      file:
+        path: /opt/{{ app_name }}
+        state: directory
+        owner: "{{ deploy_user }}"
+        mode: '0755'
+      tags: deploy
+
+    - name: Copy Docker Compose configuration
+      template:
+        src: "{{ playbook_dir }}/../templates/docker-compose.yml.j2"
+        dest: "/opt/{{ app_name }}/docker-compose.yml"
+        mode: '0644'
+      tags: deploy
+
+    - name: Copy application environment file
+      template:
+        src: "{{ playbook_dir }}/../templates/app.env.j2"
+        dest: "/opt/{{ app_name }}/.env"
+        mode: '0640'
+      tags: deploy
+
+    - name: Pull Docker images
+      docker_image:
+        name: "{{ docker_registry }}/{{ app_name }}:{{ app_version }}"
+        source: pull
+      tags: deploy
+
+    - name: Deploy application with Docker Compose
+      docker_compose:
+        project_src: "/opt/{{ app_name }}"
+        state: present
+        pull: yes
+      register: deploy_result
+      tags: deploy
+
+    - name: Wait for application to be ready
+      uri:
+        url: "http://localhost:8000/health"
+        status_code: 200
+      register: health_check
+      until: health_check.status == 200
+      retries: 30
+      delay: 10
+      tags: verify
+
+  post_tasks:
+    - name: Display deployment result
+      debug:
+        msg: |
+          Deployment completed successfully!
+          Application: {{ app_name }}
+          Version: {{ app_version }}
+          VM: {{ qemu_name }} ({{ ansible_host }})
+          Health check: Passed

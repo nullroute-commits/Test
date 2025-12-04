@@ -1,8 +1,8 @@
 # Deployment Pipeline Documentation
 
-This document describes the deployment pipeline and processes for the Django 5 Multi-Architecture CI/CD Pipeline application.
+This document describes the deployment pipeline and processes for the FastAPI Enterprise CI/CD Pipeline application with Python 3.13.
 
-**Last updated:** 2025-08-30 22:40:55 UTC by nullroute-commits
+**Last updated:** 2025-12-04 UTC
 
 ## Table of Contents
 

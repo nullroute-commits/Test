@@ -1,8 +1,11 @@
 # Configuration System Documentation
 
-This document describes the configuration management system for the Django 5 Multi-Architecture CI/CD Pipeline application.
+This document describes the configuration management system for the FastAPI Enterprise CI/CD Pipeline application with Python 3.13.
 
-**Last updated:** 2025-08-30 22:40:55 UTC by nullroute-commits
+**Last updated:** 2025-12-04 UTC
+
+> **Note:** This document describes the configuration system for the current FastAPI implementation. 
+> Some legacy Django configuration examples may be present for reference but are not used in production.
 
 ## Table of Contents
 

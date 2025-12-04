@@ -4,7 +4,9 @@ stages:
   - test
   - security
   - package
-  - deploy
+  - deploy-docker
+  - deploy-lxc
+  - deploy-vm
   - cleanup
 
 variables:
@@ -186,9 +188,9 @@ package:docker:
         docker push $CI_REGISTRY_IMAGE:latest
       fi
 
-# Deploy stage
+# Deploy stage - Docker
 .deploy:
-  stage: deploy
+  stage: deploy-docker
   image: alpine/ansible:latest
   before_script:
     - apk add --no-cache openssh-client
@@ -239,9 +241,114 @@ deploy:production:
   when: manual
   needs: ["package:docker", "deploy:staging"]
 
+# Build LXC template
+build:lxc-template:
+  stage: build
+  image: hashicorp/packer:latest
+  script:
+    - cd packer
+    - packer build lxc-template.json
+  only:
+    - main
+    - /^release\/.*$/
+  when: manual
+  artifacts:
+    paths:
+      - packer/manifest.json
+    expire_in: 1 month
+
+# Deploy stage - LXC
+.deploy-lxc:
+  stage: deploy-lxc
+  image: alpine/ansible:latest
+  before_script:
+    - apk add --no-cache openssh-client python3 py3-pip
+    - pip3 install proxmoxer requests
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | ssh-add -
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - |
+      ansible-playbook \
+        -i ansible/inventories/$ENVIRONMENT/lxc-hosts.yml \
+        ansible/playbooks/deploy-lxc.yml \
+        -e "app_version=$CI_COMMIT_SHA" \
+        -e "environment=$ENVIRONMENT" \
+        -e "proxmox_api_token_secret=$PROXMOX_API_TOKEN"
+
+deploy-lxc:staging:
+  extends: .deploy-lxc
+  environment:
+    name: staging-lxc
+    url: https://lxc-staging.example.com
+  variables:
+    ENVIRONMENT: staging
+  only:
+    - main
+  when: manual
+  needs: ["package:docker"]
+
+deploy-lxc:production:
+  extends: .deploy-lxc
+  environment:
+    name: production-lxc
+    url: https://lxc.example.com
+  variables:
+    ENVIRONMENT: prod
+  only:
+    - tags
+  when: manual
+  needs: ["package:docker", "deploy:production"]
+
+# Deploy stage - QEMU VM
+.deploy-vm:
+  stage: deploy-vm
+  image: alpine/ansible:latest
+  before_script:
+    - apk add --no-cache openssh-client python3 py3-pip
+    - pip3 install proxmoxer requests
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | ssh-add -
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - |
+      ansible-playbook \
+        -i ansible/inventories/$ENVIRONMENT/vm-hosts.yml \
+        ansible/playbooks/deploy-vm.yml \
+        -e "app_version=$CI_COMMIT_SHA" \
+        -e "environment=$ENVIRONMENT" \
+        -e "docker_registry=$CI_REGISTRY" \
+        -e "proxmox_api_token_secret=$PROXMOX_API_TOKEN"
+
+deploy-vm:staging:
+  extends: .deploy-vm
+  environment:
+    name: staging-vm
+    url: https://vm-staging.example.com
+  variables:
+    ENVIRONMENT: staging
+  only:
+    - main
+  when: manual
+  needs: ["package:docker"]
+
+deploy-vm:production:
+  extends: .deploy-vm
+  environment:
+    name: production-vm
+    url: https://vm.example.com
+  variables:
+    ENVIRONMENT: prod
+  only:
+    - tags
+  when: manual
+  needs: ["package:docker", "deploy:production"]
+
 # Performance testing
 performance:load:
-  stage: deploy
+  stage: deploy-vm
   extends: .docker
   needs: ["deploy:staging"]
   only:

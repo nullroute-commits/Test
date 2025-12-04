@@ -1,8 +1,8 @@
 # System Architecture
 
-This document describes the architecture of the Django 5 Multi-Architecture CI/CD Pipeline application.
+This document describes the architecture of the FastAPI Enterprise CI/CD Pipeline application with Python 3.13.
 
-**Last updated:** 2025-08-30 22:40:55 UTC by nullroute-commits
+**Last updated:** 2025-12-04 UTC
 
 ## Table of Contents
 
@@ -16,11 +16,11 @@ This document describes the architecture of the Django 5 Multi-Architecture CI/C
 
 ## Overview
 
-The application follows a multi-tier architecture pattern with clear separation of concerns:
+The application follows a modern async multi-tier architecture pattern with clear separation of concerns:
 
-- **Presentation Layer:** Nginx load balancer and Django web interface
-- **Application Layer:** Django business logic, RBAC, and audit systems
-- **Data Layer:** PostgreSQL database, Memcached cache, and RabbitMQ message broker
+- **Presentation Layer:** Nginx load balancer and FastAPI REST API
+- **Application Layer:** FastAPI async business logic with Pydantic validation
+- **Data Layer:** PostgreSQL 17 database with async SQLAlchemy, Redis cache, and async task processing
 
 ## System Architecture
 
@@ -54,13 +54,13 @@ The application follows a multi-tier architecture pattern with clear separation 
 │                           Application Layer                                 │
 │                                                                             │
 │  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐ │
-│  │ Django App #1 │  │ Django App #2 │  │ Django App #3 │  │ Django App #N │ │
-│  │ (Gunicorn)    │  │ (Gunicorn)    │  │ (Gunicorn)    │  │ (Gunicorn)    │ │
+│  │ FastAPI #1    │  │ FastAPI #2    │  │ FastAPI #3    │  │ FastAPI #N    │ │
+│  │ (Uvicorn)     │  │ (Uvicorn)     │  │ (Uvicorn)     │  │ (Uvicorn)     │ │
 │  │               │  │               │  │               │  │               │ │
-│  │ • RBAC        │  │ • RBAC        │  │ • RBAC        │  │ • RBAC        │ │
-│  │ • Audit       │  │ • Audit       │  │ • Audit       │  │ • Audit       │ │
-│  │ • Business    │  │ • Business    │  │ • Business    │  │ • Business    │ │
-│  │   Logic       │  │   Logic       │  │   Logic       │  │   Logic       │ │
+│  │ • Async APIs  │  │ • Async APIs  │  │ • Async APIs  │  │ • Async APIs  │ │
+│  │ • Pydantic    │  │ • Pydantic    │  │ • Pydantic    │  │ • Pydantic    │ │
+│  │ • OpenAPI     │  │ • OpenAPI     │  │ • OpenAPI     │  │ • OpenAPI     │ │
+│  │ • Health      │  │ • Health      │  │ • Health      │  │ • Health      │ │
 │  └───────────────┘  └───────────────┘  └───────────────┘  └───────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
                                       │
@@ -69,13 +69,13 @@ The application follows a multi-tier architecture pattern with clear separation 
 │                              Data Layer                                     │
 │                                                                             │
 │  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────────────┐ │
-│  │  PostgreSQL 17  │    │   Memcached     │    │      RabbitMQ 3.12      │ │
-│  │                 │    │     1.6.22      │    │                         │ │
-│  │ • Primary DB    │    │                 │    │ • Message Broker        │ │
-│  │ • Transactions  │    │ • Session Cache │    │ • Task Queues           │ │
-│  │ • ACID Compliance│   │ • Query Cache   │    │ • Event Streaming       │ │
-│  │ • Backup/Recovery│   │ • User Cache    │    │ • Dead Letter Queues    │ │
-│  │ • Replication   │    │ • App Cache     │    │ • Priority Queues       │ │
+│  │  PostgreSQL 17  │    │   Redis 7.4     │    │    Async Workers        │ │
+│  │                 │    │                 │    │                         │ │
+│  │ • Async Pool    │    │                 │    │ • Background Tasks      │ │
+│  │ • Transactions  │    │ • Session Cache │    │ • Scheduled Jobs        │ │
+│  │ • ACID Compliance│   │ • Query Cache   │    │ • Event Processing      │ │
+│  │ • Backup/Recovery│   │ • Pub/Sub       │    │ • Distributed Tasks     │ │
+│  │ • Replication   │    │ • Rate Limiting │    │ • Task Monitoring       │ │
 │  └─────────────────┘    └─────────────────┘    └─────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -99,7 +99,7 @@ The application follows a multi-tier architecture pattern with clear separation 
 │                            (Private Subnet)                                │
 │                                                                             │
 │  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐ │
-│  │ Django:8000   │  │ Django:8000   │  │ Django:8000   │  │ Django:8000   │ │
+│  │ FastAPI:8000  │  │ FastAPI:8000  │  │ FastAPI:8000  │  │ FastAPI:8000  │ │
 │  └───────────────┘  └───────────────┘  └───────────────┘  └───────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
                                       │
@@ -109,25 +109,25 @@ The application follows a multi-tier architecture pattern with clear separation 
 │                            (Private Subnet)                                │
 │                                                                             │
 │  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────────────┐ │
-│  │ PostgreSQL:5432 │    │ Memcached:11211 │    │   RabbitMQ:5672/15672   │ │
+│  │ PostgreSQL:5432 │    │   Redis:6379    │    │   Background Workers    │ │
 │  └─────────────────┘    └─────────────────┘    └─────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Component Architecture
 
-### Django Application Architecture
+### FastAPI Application Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           Django Application                               │
+│                           FastAPI Application                              │
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────────────────┐ │
-│  │                         Presentation Layer                              │ │
+│  │                         API Layer (FastAPI)                             │ │
 │  │                                                                         │ │
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐ │ │
-│  │  │   Views     │  │  Templates  │  │   Forms     │  │   Static Files  │ │ │
-│  │  │ (REST API)  │  │   (HTML)    │  │ (Validation)│  │   (CSS/JS)      │ │ │
+│  │  │   Routes    │  │  Schemas    │  │ Middleware  │  │   OpenAPI Docs  │ │ │
+│  │  │ (Endpoints) │  │ (Pydantic)  │  │  (CORS)     │  │  (Swagger/ReDoc)│ │ │
 │  │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────────┘ │ │
 │  └─────────────────────────────────────────────────────────────────────────┘ │
 │                                      │                                       │
@@ -135,8 +135,8 @@ The application follows a multi-tier architecture pattern with clear separation 
 │  │                         Business Logic Layer                            │ │
 │  │                                                                         │ │
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐ │ │
-│  │  │   Services  │  │   RBAC      │  │   Audit     │  │   Utilities     │ │ │
-│  │  │ (Business)  │  │  (Access)   │  │ (Logging)   │  │   (Helpers)     │ │ │
+│  │  │   Services  │  │ Validation  │  │   Logging   │  │   Utilities     │ │ │
+│  │  │  (Async)    │  │ (Pydantic)  │  │ (Structlog) │  │   (Helpers)     │ │ │
 │  │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────────┘ │ │
 │  └─────────────────────────────────────────────────────────────────────────┘ │
 │                                      │                                       │
@@ -144,8 +144,8 @@ The application follows a multi-tier architecture pattern with clear separation 
 │  │                         Data Access Layer                               │ │
 │  │                                                                         │ │
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐ │ │
-│  │  │   Models    │  │   ORM       │  │   Cache     │  │   Queue         │ │ │
-│  │  │ (Django)    │  │(SQLAlchemy) │  │(Memcached)  │  │  (RabbitMQ)     │ │ │
+│  │  │   Models    │  │  Async ORM  │  │   Cache     │  │   Background    │ │ │
+│  │  │(SQLAlchemy) │  │(SQLAlchemy) │  │  (Redis)    │  │   (Async)       │ │ │
 │  │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────────┘ │ │
 │  └─────────────────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -173,7 +173,7 @@ The application follows a multi-tier architecture pattern with clear separation 
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐ │ │
 │  │  │   User      │  │   Role      │  │ Permission  │  │   Session       │ │ │
 │  │  │ Permissions │  │ Permissions │  │   Cache     │  │    Cache        │ │ │
-│  │  │   Cache     │  │   Cache     │  │ (Memcached) │  │  (Memcached)    │ │ │
+│  │  │   Cache     │  │   Cache     │  │   (Redis)   │  │    (Redis)      │ │ │
 │  │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────────┘ │ │
 │  └─────────────────────────────────────────────────────────────────────────┘ │
 │                                      │                                       │
@@ -289,25 +289,25 @@ The application follows a multi-tier architecture pattern with clear separation 
 │                            Data Flow Diagram                               │
 │                                                                             │
 │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐   │
-│  │   Client    │───▶│   Nginx     │───▶│   Django    │───▶│ PostgreSQL  │   │
+│  │   Client    │───▶│   Nginx     │───▶│   FastAPI   │───▶│ PostgreSQL  │   │
 │  │  Request    │    │Load Balancer│    │Application  │    │  Database   │   │
 │  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘   │
 │                                               │                             │
 │                                               ▼                             │
 │                                      ┌─────────────┐                        │
-│                                      │  Memcached  │                        │
+│                                      │   Redis     │                        │
 │                                      │    Cache    │                        │
 │                                      └─────────────┘                        │
 │                                               │                             │
 │                                               ▼                             │
 │                                      ┌─────────────┐                        │
-│                                      │  RabbitMQ   │                        │
-│                                      │Message Queue│                        │
+│                                      │ Background  │                        │
+│                                      │   Workers   │                        │
 │                                      └─────────────┘                        │
 │                                               │                             │
 │                                               ▼                             │
 │                                      ┌─────────────┐                        │
-│                                      │ Background  │                        │
+│                                      │   Async     │                        │                        │
 │                                      │   Workers   │                        │
 │                                      └─────────────┘                        │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -394,23 +394,23 @@ The application follows a multi-tier architecture pattern with clear separation 
 │                          Development Environment                            │
 │                                                                             │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
-│  │   Django    │  │ PostgreSQL  │  │ Memcached   │  │      RabbitMQ       │ │
+│  │  FastAPI    │  │ PostgreSQL  │  │   Redis     │  │  Background Workers │ │
 │  │ (Debug=True)│  │   (Local)   │  │  (Local)    │  │      (Local)        │ │
-│  │   Port:8000 │  │ Port:5432   │  │ Port:11211  │  │  Port:5672/15672    │ │
+│  │   Port:8000 │  │ Port:5432   │  │  Port:6379  │  │   Async Tasks       │ │
 │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────────────┘ │
 │                                                                             │
 │  Additional Services:                                                       │
-│  • Adminer (Database Admin)          • Mailhog (Email Testing)             │
-│  • Debug Toolbar                     • Live Reload                         │
+│  • Swagger UI (API Docs)             • ReDoc (API Docs)                    │
+│  • Hot Reload (Uvicorn)              • Async Debugging                     │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                            Testing Environment                              │
 │                                                                             │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
-│  │   Django    │  │ PostgreSQL  │  │ Memcached   │  │      RabbitMQ       │ │
+│  │  FastAPI    │  │ PostgreSQL  │  │   Redis     │  │  Background Workers │ │
 │  │(Debug=False)│  │  (tmpfs)    │  │ (In-Memory) │  │     (Ephemeral)     │ │
-│  │  Test Mode  │  │  Fast I/O   │  │   Testing   │  │     Test Queues     │ │
+│  │  Test Mode  │  │  Fast I/O   │  │   Testing   │  │     Test Tasks      │ │
 │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────────────┘ │
 │                                                                             │
 │  Test Services:                                                             │
@@ -422,16 +422,16 @@ The application follows a multi-tier architecture pattern with clear separation 
 │                           Production Environment                            │
 │                                                                             │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
-│  │   Nginx     │  │   Django    │  │ PostgreSQL  │  │      Memcached      │ │
+│  │   Nginx     │  │  FastAPI    │  │ PostgreSQL  │  │       Redis         │ │
 │  │Load Balancer│  │  (Scaled)   │  │(Optimized)  │  │     (Clustered)     │ │
 │  │ Port:80/443 │  │   Multiple  │  │   Master/   │  │   High Available    │ │
 │  └─────────────┘  │  Instances  │  │   Replica   │  │     Distributed     │ │
 │                   └─────────────┘  └─────────────┘  └─────────────────────┘ │
 │                                                                             │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
-│  │  RabbitMQ   │  │ Monitoring  │  │   Logging   │  │      Backup         │ │
-│  │ (Clustered) │  │(Prometheus) │  │ (Fluentd)   │  │   (Automated)       │ │
-│  │ Persistent  │  │  Grafana    │  │  Central    │  │    S3/GCS           │ │
+│  │  Workers    │  │ Monitoring  │  │   Logging   │  │      Backup         │ │
+│  │(Distributed)│  │(Prometheus) │  │ (Fluentd)   │  │   (Automated)       │ │
+│  │  Async/BG   │  │  Grafana    │  │  Central    │  │    S3/GCS           │ │
 │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```

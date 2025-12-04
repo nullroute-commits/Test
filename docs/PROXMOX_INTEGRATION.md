@@ -27,12 +27,23 @@ The Proxmox integration extends the Enterprise CI/CD pipeline to support three d
 ### Proxmox VE Setup
 
 1. **Proxmox VE 8.0+** installed and configured
-2. **API Token** created for automation:
+2. **API Token** created for automation (least privilege recommended):
    ```bash
+   # Create automation user
    pveum user add ansible@pve
-   pveum aclmod / -user ansible@pve -role Administrator
-   pveum user token add ansible@pve ansible --privsep=0
+   
+   # Create a custom role with only required permissions (example: VM/CT management)
+   pveum role add CICDAutomation -privs "VM.Audit VM.PowerMgmt VM.Config VM.Console VM.Migrate VM.Clone VM.Snapshot VM.Backup Datastore.Allocate"
+   
+   # Assign the custom role to the automation user, scoped to required path
+   pveum aclmod /vms -user ansible@pve -role CICDAutomation
+   
+   # Create API token (privilege separation enabled by default)
+   pveum user token add ansible@pve ansible
    ```
+   > **Security Note:**  
+   > Do **not** use `--privsep=0` or assign the `Administrator` role unless absolutely necessary.  
+   > Always use the principle of least privilege and scope the ACL to only the required resources.
 
 3. **Network Configuration**:
    - Bridge `vmbr0` configured
@@ -303,9 +314,10 @@ Configure the following secrets in your CI/CD platform:
 # Verify token permissions
 pveum user token permissions list ansible@pve ansible
 
-# Recreate token if needed
+# Recreate token with privilege separation enabled (default)
 pveum user token remove ansible@pve ansible
-pveum user token add ansible@pve ansible --privsep=0
+pveum user token add ansible@pve ansible
+# Ensure the token's role has only the minimal required permissions for automation
 ```
 
 #### 2. LXC Container Won't Start

@@ -70,6 +70,8 @@
       tags: deploy
 
     - name: Deploy application files
+      # Note: This task uses synchronize/rsync. Ensure rsync is installed on both control node and target.
+      # Alternative: Use git clone if app_repository_url is provided
       synchronize:
         src: "{{ playbook_dir }}/../../"
         dest: "/opt/{{ app_name }}/"
@@ -77,6 +79,16 @@
           - "--exclude=.git"
           - "--exclude=__pycache__"
           - "--exclude=*.pyc"
+      when: app_repository_url is not defined
+      tags: deploy
+
+    - name: Clone application repository (alternative method)
+      git:
+        repo: "{{ app_repository_url }}"
+        dest: "/opt/{{ app_name }}"
+        version: "{{ app_version }}"
+      become_user: "{{ deploy_user }}"
+      when: app_repository_url is defined
       tags: deploy
 
     - name: Install Python dependencies

@@ -277,7 +277,6 @@ jobs:
           PROXMOX_TOKEN: ${{ secrets.PROXMOX_TOKEN }}
         run: |
           cd packer
-          packer init .
           packer build lxc-template.json
 
       - name: Upload template manifest
@@ -367,6 +366,7 @@ jobs:
           DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
         run: |
           mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           

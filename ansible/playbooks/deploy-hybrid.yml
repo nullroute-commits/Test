@@ -28,17 +28,20 @@
 
   tasks:
     - name: Deploy to Docker hosts
-      include_tasks: deploy.yml
+      include_role:
+        name: docker-host
       when: "'docker' in deployment_targets"
       tags: docker
 
     - name: Deploy to LXC containers
-      include_tasks: deploy-lxc.yml
+      include_role:
+        name: lxc-container
       when: "'lxc' in deployment_targets"
       tags: lxc
 
     - name: Deploy to QEMU VMs
-      include_tasks: deploy-vm.yml
+      include_role:
+        name: qemu-vm
       when: "'vm' in deployment_targets"
       tags: vm
 
@@ -47,7 +50,8 @@
       uri:
         url: "http://{{ item }}:8000/health"
         status_code: 200
-      loop: "{{ groups['all'] }}"
+      loop: "{{ groups.get('lxc_containers', []) + groups.get('qemu_vms', []) + groups.get('docker_hosts', []) }}"
+      when: item in ansible_play_hosts_all
       register: health_checks
       tags: verify
 

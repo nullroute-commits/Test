@@ -247,7 +247,6 @@ build:lxc-template:
   image: hashicorp/packer:latest
   script:
     - cd packer
-    - packer init .
     - packer build lxc-template.json
   only:
     - main

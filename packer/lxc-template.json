@@ -9,18 +9,15 @@
   },
   "builders": [
     {
-      "type": "proxmox-clone",
+      "type": "proxmox",
       "proxmox_url": "{{ user `proxmox_url` }}",
       "node": "{{ user `proxmox_node` }}",
       "username": "{{ user `proxmox_username` }}",
       "token": "{{ user `proxmox_token` }}",
       "insecure_skip_tls_verify": false,
       
-      "clone_type": "lxc",
-      "template_id": 9000,
-      "vm_name": "{{ user `template_name` }}",
-      "vm_id": 9001,
-      "description": "{{ user `template_description` }}",
+      "template_name": "{{ user `template_name` }}",
+      "template_description": "{{ user `template_description` }}",
       
       "memory": 2048,
       "cores": 2,
@@ -28,8 +25,7 @@
       
       "network_adapters": [
         {
-          "bridge": "vmbr0",
-          "model": "virtio"
+          "bridge": "vmbr0"
         }
       ],
       
@@ -42,9 +38,15 @@
       "type": "shell",
       "inline": [
         "apt-get update",
-        "apt-get install -y python3 python3-pip python3-venv git curl wget",
+        "apt-get install -y software-properties-common",
+        "add-apt-repository ppa:deadsnakes/ppa -y",
+        "apt-get update",
+        "apt-get install -y python3.13 python3.13-venv python3.13-dev git curl wget",
+        "curl -sS https://bootstrap.pypa.io/get-pip.py -o get-pip.py",
+        "python3.13 get-pip.py",
+        "rm get-pip.py",
         "apt-get install -y postgresql-client redis-tools",
-        "apt-get install -y build-essential libssl-dev libffi-dev python3-dev",
+        "apt-get install -y build-essential libssl-dev libffi-dev",
         "apt-get clean",
         "rm -rf /var/lib/apt/lists/*"
       ]

@@ -66,10 +66,22 @@
     - qemu
     - start
 
-- name: Wait for VM to be ready
+- name: Wait for VM to be ready (with SSH check)
   wait_for:
-    timeout: 60
-  when: qemu_start | bool
+    host: "{{ qemu_vm_ip | default('localhost') }}"
+    port: 22
+    delay: 10
+    timeout: 300
+    state: started
+  when: qemu_start | bool and qemu_cloudinit | bool and qemu_vm_ip is defined
+  tags:
+    - qemu
+    - verify
+
+- name: Pause if VM IP is not known
+  pause:
+    seconds: 60
+  when: qemu_start | bool and not qemu_cloudinit | bool
   tags:
     - qemu
     - verify

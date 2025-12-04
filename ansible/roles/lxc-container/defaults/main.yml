@@ -30,3 +30,4 @@ lxc_protection: no
 lxc_app_name: "enterprise-app"
 lxc_app_version: "latest"
 lxc_deploy_method: "ansible"  # ansible, docker, or systemd
+lxc_app_exec_start: "/opt/{{ lxc_app_name }}/venv/bin/uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --workers 4"

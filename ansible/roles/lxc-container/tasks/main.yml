@@ -1,4 +1,13 @@
 ---
+- name: Validate authentication methods
+  assert:
+    that:
+      - lxc_password is defined or lxc_ssh_public_keys is defined
+    fail_msg: "Either lxc_password or lxc_ssh_public_keys must be provided for container access"
+  tags:
+    - lxc
+    - validate
+
 - name: Create LXC container
   community.general.proxmox:
     api_host: "{{ proxmox_api_host }}"
@@ -16,10 +25,8 @@
     swap: "{{ lxc_swap }}"
     cores: "{{ lxc_cores }}"
     disk: "{{ lxc_storage }}:{{ lxc_disk_size }}"
-    netif: |
-      {
-        "net0": "name={{ lxc_net0_name }},bridge={{ lxc_net0_bridge }},ip={{ lxc_net0_ip }}{{ ',gw=' + lxc_net0_gw if lxc_net0_gw else '' }}{{ ',tag=' + lxc_net0_tag if lxc_net0_tag else '' }}"
-      }
+    netif:
+      net0: "name={{ lxc_net0_name }},bridge={{ lxc_net0_bridge }},ip={{ lxc_net0_ip }}{{ ',gw=' + lxc_net0_gw if lxc_net0_gw else '' }}{{ ',tag=' + lxc_net0_tag if lxc_net0_tag else '' }}"
     unprivileged: "{{ lxc_unprivileged }}"
     onboot: "{{ lxc_onboot }}"
     protection: "{{ lxc_protection }}"
@@ -52,6 +59,7 @@
   until: lxc_ip_result.stdout | length > 0
   retries: 30
   delay: 10
+  changed_when: false
   when: lxc_net0_ip == "dhcp"
   tags:
     - lxc

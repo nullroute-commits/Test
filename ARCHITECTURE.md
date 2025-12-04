@@ -307,7 +307,7 @@ The application follows a modern async multi-tier architecture pattern with clea
 │                                               │                             │
 │                                               ▼                             │
 │                                      ┌─────────────┐                        │
-│                                      │   Async     │                        │                        │
+│                                      │   Async     │                        │
 │                                      │   Workers   │                        │
 │                                      └─────────────┘                        │
 └─────────────────────────────────────────────────────────────────────────────┘

@@ -11,14 +11,13 @@ The actual production application uses **`pyproject.toml`** at the root of the r
 ## What's in These Files
 
 ### base.txt
-```
-Django==5.0.2
-sqlalchemy==1.4.49
-psycopg2-binary==2.9.9
-python-memcached==1.59
-pika==1.3.2
-gunicorn==23.0.0
-```
+Contains core Django dependencies. See the actual file for current versions:
+- Django
+- SQLAlchemy  
+- psycopg2-binary
+- python-memcached
+- pika (RabbitMQ client)
+- gunicorn
 
 ### development.txt
 - Inherits from base.txt
